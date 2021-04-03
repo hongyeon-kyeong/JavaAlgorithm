@@ -12,12 +12,10 @@ public class Q3055 {
     static StringTokenizer st;
     static char[][] graph;
     static boolean[][] visitedH, visitedW;
-    static Hedgehog hedgehog;
-    static Water water;
-    static int target_x, target_y;
-    static int answer;
-    static String ml;
-    static Queue<Water> waterQ = new LinkedList<Water>();
+    static Queue<Index> waters, hedgehogs;
+    static Index FINISH;
+    static int[] dx = {-1, 1, 0, 0};
+    static int[] dy = {0, 0, -1, 1};
 
     public static void main(String[] args) throws Exception {
         br = new BufferedReader(new InputStreamReader(System.in));
@@ -29,26 +27,25 @@ public class Q3055 {
         visitedH = new boolean[R][C];
         visitedW = new boolean[R][C];
 
+        waters = new LinkedList<>();
+        hedgehogs = new LinkedList<>();
+
         for (int i = 0; i < R; i++) {
-            ml = br.readLine();
+            char[] temp = br.readLine().toCharArray();
             for (int j = 0; j < C; j++) {
-
-                graph[i][j] = ml.charAt(j);
-
+                graph[i][j] = temp[j];
                 if (graph[i][j] == 'S') {
-                    hedgehog = new Hedgehog(i, j, 0);
+                    hedgehogs.add(new Index(i, j));
                     visitedH[i][j] = true;
                 } else if (graph[i][j] == '*') {
-                    water = new Water(i, j, 0);
-                    waterQ.offer(water);
+                    waters.add(new Index(i, j));
                     visitedW[i][j] = true;
                 } else if (graph[i][j] == 'D') {
-                    target_x = i;
-                    target_y = j;
+                    FINISH = new Index(i, j);
                 }
             }
         }
-        answer = bfs(hedgehog, water);
+        int answer = solution();
         if (answer == -1) {
             System.out.println("KAKTUS");
         } else {
@@ -56,29 +53,28 @@ public class Q3055 {
         }
     }
 
-    public static void move(int timecnt) {
-        int[] dx = {-1, 1, 0, 0};
-        int[] dy = {0, 0, -1, 1};
-        int nx, ny;
-        Water waterP;
-        Water waterN;
+    public static class Index {
+        int x, y;
 
-        while (!waterQ.isEmpty()) {
-            waterP = waterQ.poll();
-            //System.out.println("waterP.x = " + waterP.x + " waterP.y : " + waterP.y + " waterP.time : " + waterP.time + " timecnt : " + timecnt);
-            if (waterP.time > timecnt) {
-                waterQ.offer(waterP);
-                break;
-            }
+        public Index(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+    public static void waterMove() {
+        int len = waters.size();
+
+        for (int t = 0; t < len; t++) {
+            Index water = waters.poll();
+
             for (int d = 0; d < 4; d++) {
-                nx = waterP.x + dx[d];
-                ny = waterP.y + dy[d];
+                int nx = water.x + dx[d];
+                int ny = water.y + dy[d];
 
                 if (nx >= 0 && ny >= 0 && nx < R && ny < C) {
                     if ( graph[nx][ny] != 'X' && graph[nx][ny] != 'D' && !visitedW[nx][ny]) {
                         graph[nx][ny] = '*';
-                        waterN = new Water(nx, ny, waterP.time + 1);
-                        waterQ.offer(waterN);
+                        waters.add(new Index(nx, ny));
                         visitedW[nx][ny] = true;
                     }
                 }
@@ -86,60 +82,31 @@ public class Q3055 {
         }
     }
 
-    static class Water {
-        int x, y, time;
+    private static int solution() {
 
-        public Water(int x, int y, int time) {
-            this.x = x;
-            this.y = y;
-            this.time = time;
-        }
+        int count = 0;
 
-    }
+        while (!hedgehogs.isEmpty()) {
+            waterMove();
+            count++;
 
-    static class Hedgehog {
-        int x, y, time;
+            int len = hedgehogs.size();
+            for (int t = 0; t < len; t++) {
 
-        public Hedgehog(int x, int y, int time) {
-            this.x = x;
-            this.y = y;
-            this.time = time;
-        }
-    }
+                Index hedgehog = hedgehogs.poll();
 
-    private static int bfs(Hedgehog hedgehog, Water water) {
+                for (int i = 0; i < 4; i++) {
+                    int nx = hedgehog.x + dx[i];
+                    int ny = hedgehog.y + dy[i];
 
-        Queue<Hedgehog> q = new LinkedList<>();
+                    if (nx >= 0 && ny >= 0 && nx < R && ny < C) {
 
-        int timecnt = 0;
-        int[] dx = {-1, 1, 0, 0};
-        int[] dy = {0, 0, -1, 1};
-        int nx, ny;
-        q.offer(hedgehog);
-        visitedH[hedgehog.x][hedgehog.y] = true;
-        move(0);
+                        if (nx == FINISH.x && ny == FINISH.y) {
+                            return count;
+                        }
 
-        while (!q.isEmpty()) {
-            Hedgehog hh = q.poll();
-            //System.out.println("hh.x = " + hh.x + " hh.y : " + hh.y + " hh.time : " + hh.time + " timecnt : " + timecnt);
-            if (hh.time > timecnt) {
-                q.offer(hh);
-                move(hh.time);
-                timecnt += 1;
-            }
-            if ((hh.x == target_x) && (hh.y == target_y)) {
-                return timecnt;
-            }
-
-            for (int i = 0; i < 4; i++) {
-                nx = hh.x + dx[i];
-                ny = hh.y + dy[i];
-
-                if (nx >= 0 && ny >= 0 && nx < R && ny < C) {
-                    if (graph[nx][ny] == '.' || graph[nx][ny] == 'D') {
-                        if (!visitedH[nx][ny]) {
-                            Hedgehog nexthh = new Hedgehog(nx, ny, hh.time + 1);
-                            q.offer(nexthh);
+                        if (graph[nx][ny] == '.' && visitedH[nx][ny]) {
+                            hedgehogs.add(new Index(nx, ny));
                             visitedH[nx][ny] = true;
                         }
                     }
@@ -148,5 +115,4 @@ public class Q3055 {
         }
         return -1;
     }
-
 }
