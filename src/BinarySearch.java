@@ -12,7 +12,7 @@ public class BinarySearch {
         st = new StringTokenizer(br.readLine(), " ");
         N = Integer.parseInt(st.nextToken());
         target = Integer.parseInt(st.nextToken());
-        array = new int[N+3];
+        array = new int[N+5];
         st2 = new StringTokenizer(br.readLine(), " ");
         for (int i = 0; i < N; i++) {
             array[i] = Integer.parseInt(st2.nextToken());
