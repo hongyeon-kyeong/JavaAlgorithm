@@ -1,4 +1,4 @@
-package Programmers.Level1;
+package src.Programmers.Level1;
 
 //import static Programmers.Level1.Solution.*;
 
