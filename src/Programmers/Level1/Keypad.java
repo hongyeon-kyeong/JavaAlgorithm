@@ -1,12 +1,24 @@
 package src.Programmers.Level1;
 
+import java.util.SplittableRandom;
+
 public class Keypad {
-    static int[] keypadX = {3, 0, 0, 0, 1, 1, 1, 2, 2, 2};
-    static int[] keypadY = {1, 0, 1, 2, 0, 1, 2, 0, 1, 2};
-    static int rightPx = 3;
-    static int rightPy = 2;
-    static int leftPx = 3;
-    static int leftPy = 0;
+    static int[][] keypadPos = {
+            {3, 1},
+            {0, 0},
+            {0, 1},
+            {0, 2},
+            {1, 0},
+            {1, 1},
+            {1, 2},
+            {2, 0},
+            {2, 1},
+            {2, 2},
+    };
+    static int[] leftPos = {3, 0};
+    static int[] rightPos = {3, 2};
+    static String handside;
+
     static String answer = "";
 
     public static void main(String[] args) {
@@ -14,51 +26,31 @@ public class Keypad {
         String hand = "right";
         System.out.println(solution(numbers, hand));
     }
-    public static String solution(int[] numbers, String hand) {
 
-        for (int i = 0; i < numbers.length; i++) {
-            int number = numbers[i];
-            if (keypadY[number] == 0) {
-                pushKeypad("L", keypadX[number], keypadY[number]);
-                continue;
-            }
-            if (keypadY[number] == 2) {
-                pushKeypad("R", keypadX[number], keypadY[number]);
-                continue;
-            }
-            if (keypadY[number] == 1) {
-                int leftDiff = getDiff(leftPx, leftPy, keypadX[number], keypadY[number]);
-                int rightDiff = getDiff(rightPx, rightPy, keypadX[number], keypadY[number]);
-                if (leftDiff < rightDiff) {
-                    pushKeypad("L", keypadX[number], keypadY[number]);
-                } else if (rightDiff < leftDiff) {
-                    pushKeypad("R", keypadX[number], keypadY[number]);
-                } else {
-                    if (hand.equals("left")) {
-                        pushKeypad("L", keypadX[number], keypadY[number]);
-                    } else {
-                        pushKeypad("R", keypadX[number], keypadY[number]);
-                    }
-                }
-            }
+    public static String solution(int[] numbers, String hand) {
+        handside = (hand.equals("right")) ? "R" : "L";
+
+
+        for (int number : numbers) {
+            String nextHand = pushKeypad(number);
+            answer += nextHand;
+
+            if (nextHand.equals("L")) {leftPos = keypadPos[number]; continue;}
+            if (nextHand.equals("R")) {rightPos = keypadPos[number]; continue;}
 
         }
-
         return answer;
     }
 
-    private static void pushKeypad(String hand, int nx, int ny) {
-        answer += hand;
-        if ("L".equals(hand)) {
-            leftPx = nx;
-            leftPy = ny;
-        } else {
-            rightPx = nx;
-            rightPy = ny;
-        }
+    private static String pushKeypad(int num) {
+        if (num == 1 || num == 4 || num == 7) return "L";
+        if (num == 3 || num == 6 || num == 9) return "R";
+        if (getDiff(leftPos, num) > getDiff(rightPos, num)) return "R";
+        if (getDiff(leftPos, num) < getDiff(rightPos, num)) return "L";
+        return handside;
     }
 
-    private static int getDiff(int x1, int y1, int x2, int y2) {
-        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+    private static int getDiff(int[] pos, int num) {
+        return Math.abs(pos[0] - keypadPos[num][0]) + Math.abs(pos[1] - keypadPos[num][1]);
     }
 }
