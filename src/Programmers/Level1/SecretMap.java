@@ -12,21 +12,17 @@ public class SecretMap {
         Arrays.stream(solution(n, arr1, arr2)).forEach(a -> System.out.println(a));
     }
     public static String[] solution(int n, int[] arr1, int[] arr2) {
-        String[] answer = {};
-        int[][] map1 = new int[n][n];
-        int[][] map2 = new int[n][n];
-        int[][] secretMap = new int[n][n];
-
+        String[] result = new String[n];
         for (int i = 0; i < n; i++) {
-            map1[i] = toBinaryNum(arr1[i], n);
-            map2[i] = toBinaryNum(arr2[i], n);
+            result[i] = Integer.toBinaryString(arr1[i] | arr2[i]);
         }
-
-        secretMap = sumMap(map1, map2);
-        answer = mapToAnswer(secretMap);
-        return answer;
+        for (int i = 0; i < n; i++) {
+            result[i] = String.format("%" + n + "s", result[i]);
+            result[i] = result[i].replaceAll("1", "#");
+            result[i] = result[i].replaceAll("0", " ");
+        }
+        return result;
     }
-
     private static String[] mapToAnswer(int[][] secretMap) {
         String[] answer = new String[secretMap.length];
         for (int i = 0; i < secretMap.length; i++) {
